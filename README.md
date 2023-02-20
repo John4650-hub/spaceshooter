@@ -1,2 +1,2 @@
-# spaceshooter
-A space shooting game made with phaser 3
+# Gamepad-snippet
+This a gamepad to reduce on the load while building android games 
