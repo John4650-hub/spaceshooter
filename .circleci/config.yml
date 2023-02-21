@@ -28,8 +28,7 @@ jobs:
          command: |
            echo $PATH
            cd platforms
-           ANDROID_ANDROID_SDK_ROOT=${ANDROID_HOME}
-           ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}
+           export PATH=$PATH:${ANDROID_ANDROID_SDK_ROOT}:${ANDROID_HOME}:/usr/bin/java
            sudo cordova build android
            ls -lh android/app/build/outputs/apk/debug/
 
