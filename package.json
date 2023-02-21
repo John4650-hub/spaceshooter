@@ -1,11 +1,12 @@
 {
-  "name": "com.vgamepad.gamered",
-  "displayName": "VGPad",
+  "name": "com.space.shooter",
+  "displayName": "Space shooter",
   "version": "1.0.0",
-  "description": "This is a virtual gamepad for phaser",
-  "main": "index.js",
+  "description": "This is my preferred setting of ace code editor",
+  "main":"./www/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js" 
   },
   "keywords": [
     "ecosystem:cordova"

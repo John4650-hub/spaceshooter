@@ -1,0 +1,15 @@
+{
+  "name": "com.vgamepad.gamered",
+  "displayName": "VGPad",
+  "version": "1.0.0",
+  "description": "This is a virtual gamepad for phaser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "John Delvin",
+  "license": "Apache-2.0"
+}

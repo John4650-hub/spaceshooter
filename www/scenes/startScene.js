@@ -12,6 +12,7 @@ export default class startScene extends Phaser.Scene {
     this.load.image("bgPng", URL + '/Starfield.png')
   }
   create() {
+
     this.sound.play("bgM", { loop: true, volume: 10 })
     let bgPng = this.add.tileSprite(0, 0, 800, 800, "bgPng").setOrigin(0)
     this.time.addEvent({

@@ -1,0 +1,28 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/android:2022.07.1-node
+    steps:
+      - checkout
+      - run:
+         name: install dependecies
+         command: |
+           sudo apt-get install openjdk-17
+           sudo npm install --save-dev webpack webpack-cli
+           sudo npm install -g cordova
+      - run:
+         name: transpile code
+         command: |
+           cd www && mkdir dist && cd ..
+           npm run build
+      - run:
+         name: start cordova config
+         command: |
+           sudo cordova platform add android
+      
+      - run: ls
+
+      - store_artifacts:
+          path: android/app/build/outputs/apk/debug/app-debug.apk
