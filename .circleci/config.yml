@@ -21,8 +21,9 @@ jobs:
          name: start cordova config
          command: |
            sudo cordova platform add android
+           ls
       
-      - run: ls
+      - run: ls android/app/outputs/apk/debug
 
       - store_artifacts:
           path: android/app/build/outputs/apk/debug/app-debug.apk
