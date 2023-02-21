@@ -26,12 +26,10 @@ jobs:
       - run:
          name: start apk build
          command: |
+           echo $PATH
            cd platforms
            ANDROID_ANDROID_SDK_ROOT=${ANDROID_HOME}
            ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}
-           export ANDROID_SDK_ROOT='/home/circleci/android-sdk'
-           export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
-           npm run build:android
            sudo cordova build android
            ls -lh android/app/build/outputs/apk/debug/
 
