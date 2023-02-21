@@ -29,6 +29,7 @@ jobs:
            cd platforms
            export ANDROID_HOME="/home/circleci/android-sdk"
            export ANDROID_SDK_ROOT=$ANDROID_HOME
+           export PATH=$PATH:$ANDROID_SDK_ROOT:$ANDROID_HOME
            sudo cordova build android
            ls -lh android/app/build/outputs/apk/debug/
 
