@@ -27,8 +27,10 @@ jobs:
          name: start apk build
          command: |
            echo $PATH
+           ls /usr/bin/ja*
            cd platforms
-           export PATH=$PATH:${ANDROID_ANDROID_SDK_ROOT}:${ANDROID_HOME}:/usr/bin/java
+           export PATH=$PATH:${ANDROID_SDK_ROOT}:${ANDROID_HOME}:/usr/bin/java
+           echo $PATH
            sudo cordova build android
            ls -lh android/app/build/outputs/apk/debug/
 
