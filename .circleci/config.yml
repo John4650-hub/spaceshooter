@@ -9,7 +9,7 @@ jobs:
       - run:
          name: install dependecies
          command: |
-           sudo apt-get install openjdk-17
+           java --version
            sudo npm install --save-dev webpack webpack-cli
            sudo npm install -g cordova
       - run:
