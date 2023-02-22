@@ -13,16 +13,20 @@ export default class mainScene extends Phaser.Scene {
     this.scoreText;
     this.score = 0;
     this.shipMusic;
+    this.bulletGroup;
+    this.mytext;
   }
   init() {
     this.life = 200;
-    this.gas = 1000;
+    this.gas = 10;
     this.MassDestruction = false
     this.deadMonster = false;
     this.deadMe = false;
     this.reached = false;
     this.MassDestruction = false
-    this.shipMusic=null;
+    this.shipMusic = null;
+    this.textAdded = false
+    
   }
   preload() {
     this.load.plugin(
@@ -60,7 +64,7 @@ export default class mainScene extends Phaser.Scene {
   create() {
     this.scene.stop("startScene")
     this.scale.startFullscreen();
-    this.shipMusic = this.sound.add("bgMusic",BG_MUSIC_CONFIG);
+    this.shipMusic = this.sound.add("bgMusic", BG_MUSIC_CONFIG);
     let bgImg = this.add.tileSprite(0, 0, 800, 600, 'nebula').setOrigin(0).setScrollFactor(0)
     let moon = this.add.image(100, 100, "moon").setScale(2).setOrigin(0).setScrollFactor(0)
     let mars = this.add.image(100, 10, "mars").setScale(0.5).setOrigin(0).setScrollFactor(0)
@@ -120,7 +124,9 @@ export default class mainScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 1000,
       callback: () => {
-        this.gas -= 5
+        if(this.gas>0){
+        this.gas -= 5;
+        }
         this.gasText.setText(`GAS: ${this.gas}ltrs`)
         if (this.player.y > 760) {
           xpop = Phaser.Math.Between(720, 980)
@@ -128,6 +134,7 @@ export default class mainScene extends Phaser.Scene {
           let mChild = monsterChildGp.create(xpop, ypop, "monsterChild").setScale(2)
 
         }
+        
         else if (this.player.y < 760) {
           this.reached = true
         }
@@ -164,7 +171,7 @@ export default class mainScene extends Phaser.Scene {
       .on("update", this.dumpJoyStickState, this);
     this.padCursorKeys = this.joyStick.createCursorKeys();
     this.dumpJoyStickState();
-
+    
     //create keyboard cursors keys
     this.keyboardCursorKeys = this.input.keyboard.createCursorKeys();
     var rect = this.add
@@ -245,18 +252,7 @@ export default class mainScene extends Phaser.Scene {
     bkey.on("pointerdown", () => {
       ringScaleUp(bkey);
       bkey.setScale(DOWN_SCALE);
-      if (this.MassDestruction) {
-        let misile = this.physics.add.sprite(this.player.x, this.player.y, "bomb").setScale(0.5)
-        misile.setVelocityY(-400)
-        this.physics.add.overlap(misile, this.monster, () => {
-          this.monster.setTexture("exp")
-          this.monster.setScale(4)
-          misile.setVelocityY(0)
-          misile.setTexture("exp")
-          misile.setScale(4)
-          this.deadMonster = true;
-        }, null, this)
-      }
+      this.shoot_misile()
     });
     akey.on("pointerdown", () => {
       ringScaleUp(akey);
@@ -267,24 +263,18 @@ export default class mainScene extends Phaser.Scene {
       ringScaleDown(ykey);
       ykey.setScale(SCALE_NUM);
     });
-    let bullet1;
-    let bullet2;
+
     xkey.on("pointerup", () => {
       ringScaleDown(xkey);
       xkey.setScale(SCALE_NUM);
-      if (this.life > 0 || this.player.texture.key != 'exp') {
-        bullet1 = this.add.image(this.player.x - 20, this.player.y, 'bLeft').setAngle(-90).setScale(0.3)
-        bullet2 = this.add.image(this.player.x + 20, this.player.y, 'bRight').setAngle(-90).setScale(0.3)
-        this.children.swap(this.player, bullet1)
-        this.children.swap(this.player, bullet2)
-        this.bulletGroup.addMultiple([bullet1, bullet2]);
-        this.sound.play('shot', { volume: 15 })
-      }
-    });
+      this.shoot_bullets()
+    })
+
     bkey.on("pointerup", () => {
       ringScaleDown(bkey);
       bkey.setScale(SCALE_NUM);
     });
+
     akey.on("pointerup", () => {
       ringScaleDown(akey);
       akey.setScale(SCALE_NUM);
@@ -301,13 +291,18 @@ export default class mainScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.run("pauseScene");
     });
-
-
     settingsBtn.on("pointerdown", function() {
       if (this.padVisible == true) {
         whiteRings.toggleVisible()
         padGroup.toggleVisible()
         settingsBtn.setTexture("keyboard-icon")
+        const info = this.add.text(this.player.x - 150, this.player.y - 200, `W - > Shooting bullets`, { fontSize: 32, color: "#00ff00", fontStyle: 'bold' })
+        this.time.addEvent({
+          delay: 3000,
+          callback: () => {
+            info.destroy()
+          }
+        })
         this.padVisible = false
       }
       else if (this.padVisible == false) {
@@ -316,6 +311,14 @@ export default class mainScene extends Phaser.Scene {
         settingsBtn.setTexture("settings")
         this.padVisible = true
       }
+    }, this)
+    //keyboard
+    this.input.keyboard.on('keydown-W', () => {
+      this.shoot_bullets()
+    }, this)
+    this.input.keyboard.on('keydown-A', () => {
+      this.shoot_misile()
+
     }, this)
 
     const cam = this.cameras.main;
@@ -378,7 +381,7 @@ export default class mainScene extends Phaser.Scene {
     }, null, this)
 
     this.scoreText = this.add.text(0, GAMEHEIGHT - GAMEHEIGHT, "Score: 0", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
-    this.gasText = this.add.text(GAMEWIDTH / 1.3, 0, "GAS: 1000ltrs", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
+    this.gasText = this.add.text(GAMEWIDTH / 1.3, 0, "GAS: "+this.gas, TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
     this.lifeText = this.add.text(GAMEWIDTH / 1.3, 80, "Life: 200%", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
     this.physics.add.collider(this.player, this.monster, () => {
       if (this.monster.texture.key == 'monster') {
@@ -387,6 +390,21 @@ export default class mainScene extends Phaser.Scene {
         this.life = 0
       }
     }, null, this)
+    let myRect = this.add.rectangle(this.monster.x-50,750,100,200).setAlpha(0);
+    this.physics.add.existing(myRect,true)
+    this.physics.add.overlap(this.player,myRect,()=>{
+      if(this.textAdded == false){
+      let mytext = this.add.text(this.monster.x-200, this.monster.y+300, `press A or box to 
+shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
+      this.time.addEvent({
+        delay:2000,
+        callback:()=>{mytext.destroy()
+        }
+      })
+      this.textAdded =true
+      }
+    })
+    
 
   }
   dumpJoyStickState() {
@@ -414,7 +432,7 @@ export default class mainScene extends Phaser.Scene {
       })
 
     }
-    else if (this.deadMe) {
+    else if (this.deadMe|| this.gas<5) {
       this.player.clearTint()
       this.shipMusic.stop()
       this.player.setTexture("exp")
@@ -428,7 +446,7 @@ export default class mainScene extends Phaser.Scene {
         callbackScope: this
       })
     }
-    if (this.life > 0) {
+    if (this.life > 0 && this.gas>=5) {
       if (this.moving) {
         this.player.clearTint()
         if (this.shipMusic.isPlaying == false) {
@@ -438,8 +456,8 @@ export default class mainScene extends Phaser.Scene {
         this.shipMusic.stop();
       }
       if (this.padCursorKeys.up.isDown || this.keyboardCursorKeys.up.isDown) {
-        this.player.setVelocityY(-200);
-        this.shipEngine.emitParticle(200, this.player.x, this.player.y)
+        this.player.setVelocityY(-300);
+        this.shipEngine.emitParticle(300, this.player.x, this.player.y)
         this.moving = true
 
       }
@@ -459,8 +477,11 @@ export default class mainScene extends Phaser.Scene {
         this.moving = false
         this.player.setVelocity(0);
       }
-    } else if (this.life <= 0) {
+    } else if (this.life <= 0 || this.gas<5) {
+      this.player.setVelocityY(-50);
+      this.life = 0
       this.deadMe = true
+      
     }
   }
 
@@ -477,5 +498,29 @@ export default class mainScene extends Phaser.Scene {
 
     this.score += 5;
     this.scoreText.setText(`Score: ${this.score}`)
+  }
+  shoot_misile() {
+    if (this.MassDestruction) {
+      let misile = this.physics.add.sprite(this.player.x, this.player.y, "bomb").setScale(0.5)
+      misile.setVelocityY(-400)
+      this.physics.add.overlap(misile, this.monster, () => {
+        this.monster.setTexture("exp")
+        this.monster.setScale(4)
+        misile.setVelocityY(0)
+        misile.setTexture("exp")
+        misile.setScale(4)
+        this.deadMonster = true;
+      }, null, this)
+    }
+  }
+  shoot_bullets() {
+    if (this.life > 0 || this.player.texture.key != 'exp') {
+      let bullet1 = this.add.image(this.player.x - 20, this.player.y, 'bLeft').setAngle(-90).setScale(0.3)
+      let bullet2 = this.add.image(this.player.x + 20, this.player.y, 'bRight').setAngle(-90).setScale(0.3)
+      this.children.swap(this.player, bullet1)
+      this.children.swap(this.player, bullet2)
+      this.bulletGroup.addMultiple([bullet1, bullet2]);
+      this.sound.play('shot', { volume: 15 })
+    }
   }
 }
