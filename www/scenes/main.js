@@ -18,7 +18,7 @@ export default class mainScene extends Phaser.Scene {
   }
   init() {
     this.life = 200;
-    this.gas = 10;
+    this.gas = 500;
     this.MassDestruction = false
     this.deadMonster = false;
     this.deadMe = false;
@@ -103,21 +103,11 @@ export default class mainScene extends Phaser.Scene {
       key: "mChildIdle",
       frames: this.anims.generateFrameNames("monsterChild", { frames: [0, 1] }),
       repeat: -1,
-      frameRate: 2
+      frameRate: 5
     })
     this.monster.play('monsterIdle')
-    this.time.addEvent({
-      delay: 1000,
-      callback: () => {
-        monsterChildGp.playAnimation("mChildIdle")
-      },
-      callbackScope: this,
-      loop: true
-    })
-    //stroid.play('roll')
     let monsterChildGp = this.physics.add.group({
-      velocityY: 100,
-      //gravityY:   10
+      velocityY: 200,
     })
 
     let ypop, xpop;
@@ -132,6 +122,7 @@ export default class mainScene extends Phaser.Scene {
           xpop = Phaser.Math.Between(720, 980)
           ypop = Phaser.Math.Between(this.monster.y, this.monster.y + 1)
           let mChild = monsterChildGp.create(xpop, ypop, "monsterChild").setScale(2)
+          mChild.play("mChildIdle")
 
         }
         
@@ -142,6 +133,8 @@ export default class mainScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     })
+    
+    
     let strX = 0,
       strY = 450;
     let rocks = this.physics.add.group({
