@@ -9,7 +9,8 @@ let config = {
   type: Phaser.AUTO,
   parent: "windows",
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
+    autoCenter: Phaser.Scale.CENTER_BOTH
   },
   width: GAMEWIDTH,
   height: GAMEHEIGHT,

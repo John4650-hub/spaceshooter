@@ -9,6 +9,7 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <platform name="android">
+    <icon src="res/icons/icon.png" />
     <preference name="BackgroundColor" value="0x000000"/>
     <preference name="HideKeyboardFormAccessoryBar" value="true"/>
     <preference name="Orientation" value="landscape" />

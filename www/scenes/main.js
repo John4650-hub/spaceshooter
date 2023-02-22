@@ -12,6 +12,7 @@ export default class mainScene extends Phaser.Scene {
     this.ship;
     this.scoreText;
     this.score = 0;
+    this.shipMusic;
   }
   init() {
     this.life = 200;
@@ -21,6 +22,7 @@ export default class mainScene extends Phaser.Scene {
     this.deadMe = false;
     this.reached = false;
     this.MassDestruction = false
+    this.shipMusic=null;
   }
   preload() {
     this.load.plugin(
@@ -57,16 +59,15 @@ export default class mainScene extends Phaser.Scene {
 
   create() {
     this.scene.stop("startScene")
-    this.input.on("pointerdown", () => {
-      this.scale.startFullscreen();
-    });
+    this.scale.startFullscreen();
+    this.shipMusic = this.sound.add("bgMusic",BG_MUSIC_CONFIG);
     let bgImg = this.add.tileSprite(0, 0, 800, 600, 'nebula').setOrigin(0).setScrollFactor(0)
     let moon = this.add.image(100, 100, "moon").setScale(2).setOrigin(0).setScrollFactor(0)
     let mars = this.add.image(100, 10, "mars").setScale(0.5).setOrigin(0).setScrollFactor(0)
     this.monster = this.physics.add.sprite(GAMEWIDTH, GAMEHEIGHT / 2, "monster").setScale(3)
     this.monster.body.setSize(30, 30)
     this.shipEngine = this.add.particles("exos")
-    this.player = this.physics.add.sprite(GAMEWIDTH, /*5936*/ 800, "ship").setScale(2).setAngle(-90)
+    this.player = this.physics.add.sprite(GAMEWIDTH, 5936, "ship").setScale(2).setAngle(-90)
     this.player.body.setSize(40)
     this.nitroEmitter = this.shipEngine.createEmitter({
       lifespan: 1000,
@@ -271,13 +272,14 @@ export default class mainScene extends Phaser.Scene {
     xkey.on("pointerup", () => {
       ringScaleDown(xkey);
       xkey.setScale(SCALE_NUM);
-      if(this.life>0 || this.player.texture.key!='exp'){
-      bullet1 = this.add.image(this.player.x - 20, this.player.y, 'bLeft').setAngle(-90).setScale(0.3)
-      bullet2 = this.add.image(this.player.x + 20, this.player.y, 'bRight').setAngle(-90).setScale(0.3)
-      this.children.swap(this.player, bullet1)
-      this.children.swap(this.player, bullet2)
-      this.bulletGroup.addMultiple([bullet1, bullet2]);
-      this.sound.play('shot', { volume: 15 })}
+      if (this.life > 0 || this.player.texture.key != 'exp') {
+        bullet1 = this.add.image(this.player.x - 20, this.player.y, 'bLeft').setAngle(-90).setScale(0.3)
+        bullet2 = this.add.image(this.player.x + 20, this.player.y, 'bRight').setAngle(-90).setScale(0.3)
+        this.children.swap(this.player, bullet1)
+        this.children.swap(this.player, bullet2)
+        this.bulletGroup.addMultiple([bullet1, bullet2]);
+        this.sound.play('shot', { volume: 15 })
+      }
     });
     bkey.on("pointerup", () => {
       ringScaleDown(bkey);
@@ -379,10 +381,11 @@ export default class mainScene extends Phaser.Scene {
     this.gasText = this.add.text(GAMEWIDTH / 1.3, 0, "GAS: 1000ltrs", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
     this.lifeText = this.add.text(GAMEWIDTH / 1.3, 80, "Life: 200%", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
     this.physics.add.collider(this.player, this.monster, () => {
-      if(this.monster.texture.key=='monster'){
-      this.player.setTexture('exp')
-      this.deadMe = true
-      this.life = 0}
+      if (this.monster.texture.key == 'monster') {
+        this.player.setTexture('exp')
+        this.deadMe = true
+        this.life = 0
+      }
     }, null, this)
 
   }
@@ -400,6 +403,7 @@ export default class mainScene extends Phaser.Scene {
       this.MassDestruction = true
     }
     if (this.deadMonster) {
+      this.shipMusic.stop()
       this.time.addEvent({
         delay: 3000,
         callback: () => {
@@ -412,6 +416,7 @@ export default class mainScene extends Phaser.Scene {
     }
     else if (this.deadMe) {
       this.player.clearTint()
+      this.shipMusic.stop()
       this.player.setTexture("exp")
       this.time.addEvent({
         delay: 2000,
@@ -426,9 +431,11 @@ export default class mainScene extends Phaser.Scene {
     if (this.life > 0) {
       if (this.moving) {
         this.player.clearTint()
-        this.sound.play('bgMusic', BG_MUSIC_CONFIG)
+        if (this.shipMusic.isPlaying == false) {
+          this.shipMusic.play()
+        }
       } else if (this.moving == false) {
-        this.sound.stopByKey('bgMusic')
+        this.shipMusic.stop();
       }
       if (this.padCursorKeys.up.isDown || this.keyboardCursorKeys.up.isDown) {
         this.player.setVelocityY(-200);
