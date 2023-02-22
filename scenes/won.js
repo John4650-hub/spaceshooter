@@ -6,11 +6,8 @@ export default class Lost extends Phaser.Scene {
     super({ key: "won" })
   }
   create() {
-this.input.on("pointerdown", () => {
-  this.scale.startFullscreen();
-});
-
     this.scene.stop("mainScene")
+    this.scale.startFullscreen()
     this.add.text(GAMEWIDTH / 6, GAMEHEIGHT / 5, `YO, YOU WON,
 thanks for playing my game`, { fontFamily: "times new roman", fontSize: "32px", color: "#00ff00" })
     this.time.addEvent({
