@@ -109,6 +109,10 @@ export default class mainScene extends Phaser.Scene {
     })
     this.monster.play('monsterIdle')
     let monsterChildGp = this.physics.add.group({
+      createCallback:(ch)=>{
+        let p = this.physics.add.existing(ch,0);
+        p.body.pushable= false
+      },
       velocityY: 200,
     })
 
@@ -125,7 +129,7 @@ export default class mainScene extends Phaser.Scene {
           ypop = Phaser.Math.Between(this.monster.y, this.monster.y + 1)
           let mChild = monsterChildGp.create(xpop, ypop, "monsterChild").setScale(2)
           mChild.play("mChildIdle")
-
+          
         }
 
         else if (this.player.y < 760) {
@@ -133,9 +137,11 @@ export default class mainScene extends Phaser.Scene {
         }
       },
       callbackScope: this,
-      loop: true
+      loop:true
+      
     })
-
+  
+    
 
     let strX = 0,
       strY = 450;
@@ -363,7 +369,7 @@ export default class mainScene extends Phaser.Scene {
       if (this.life > 0) {
         this.life -= 1
         this.damage += 0.5
-        this.lifeText.setText(`Damage: ${this.damage}%`);
+        this.lifeText.setText(`Damage: ${this.damage}%`)
         this.player.setTint(0xcc0000);
         this.cameras.main.shake(100)
       }
@@ -489,7 +495,7 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
   destroyAlien(bullets, aliens) {
     bullets.destroy()
     this.time.addEvent({
-      delay: 3000,
+      delay: 100,
       callback: () => { aliens.destroy() },
       // callbackScope:this
     })

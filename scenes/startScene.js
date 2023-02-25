@@ -17,7 +17,7 @@ export default class startScene extends Phaser.Scene {
   create() {
     this.sound.play("bgM", { loop: true, volume: 10 })
     this.scale.startFullscreen();
-    let bgPng = this.add.tileSprite(0, 0, 800, 800, "bgPng").setOrigin(0)
+    let bgPng = this.add.tileSprite(0, 0, GAMEWIDTH, GAMEHEIGHT, "bgPng").setOrigin(0)
     this.time.addEvent({
       delay: 100,
       callback: () => {
