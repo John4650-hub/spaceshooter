@@ -7,16 +7,16 @@ jobs:
     steps:
       - checkout
       - run:
-        name: transpile code
-        command: |
-          sudo npm install --save-dev webpack webpack-cli
-          cd www && mkdir dist && cd ..
-          npm run build
+         name: transpile code
+         command: |
+           sudo npm install --save-dev webpack webpack-cli
+           cd www && mkdir dist && cd ..
+           npm run build
       - run:
-        name: package build and clean
-        command: |
-          bash clean.sh
-          zip -r spaceshooter.zip www
+         name: package build and clean
+         command: |
+           bash clean.sh
+           zip -r spaceshooter.zip www
 
       - store_artifacts:
           path: spaceshooter.zip
