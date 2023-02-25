@@ -78,7 +78,7 @@ export default class mainScene extends Phaser.Scene {
     this.nitroEmitter = this.shipEngine.createEmitter({
       lifespan: 1000,
       speedY: { start: 100, end: 200, steps: 20 },
-      scale: { start: 0.2, end: 0.02 },
+      scale: { start: 0.2, end: 0 },
       blendMode: 'ADD',
       follow: this.player,
       frequency: 100
@@ -118,14 +118,14 @@ export default class mainScene extends Phaser.Scene {
 
     let ypop, xpop;
     this.time.addEvent({
-      delay: 1000,
+      delay: 500,
       callback: () => {
         if (this.gas > 0) {
           this.gas -= 5;
         }
         this.gasText.setText(`GAS: ${this.gas}ltrs`)
         if (this.player.y > 760) {
-          xpop = Phaser.Math.Between(720, 980)
+          xpop = Phaser.Math.Between(800, 1000)
           ypop = Phaser.Math.Between(this.monster.y, this.monster.y + 1)
           let mChild = monsterChildGp.create(xpop, ypop, "monsterChild").setScale(2)
           mChild.play("mChildIdle")
