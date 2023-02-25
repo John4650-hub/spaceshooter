@@ -11,12 +11,13 @@ export default class mainScene extends Phaser.Scene {
     this.rot = 0;
     this.ship;
     this.scoreText;
-    this.score = 0;
     this.shipMusic;
     this.bulletGroup;
     this.mytext;
   }
   init() {
+    this.damage = 0
+    this.score = 0;
     this.life = 200;
     this.gas = 500;
     this.MassDestruction = false
@@ -26,7 +27,7 @@ export default class mainScene extends Phaser.Scene {
     this.MassDestruction = false
     this.shipMusic = null;
     this.textAdded = false
-    
+
   }
   preload() {
     this.load.plugin(
@@ -47,7 +48,7 @@ export default class mainScene extends Phaser.Scene {
     this.load.image("keyboard-icon", `${URL}/keyboard.png`);
     this.load.image('ship', `${URL}/ship.png`);
     this.load.spritesheet("ast1", `${URL}/astroid.png`, { frameWidth: 144 / 3, frameHeight: 144 / 3 })
-    this.load.spritesheet("monster", URL + "/monster.png", { frameWidth: 384 / 3, frameHeight: 256 / 2 });
+    this.load.spritesheet("monster", URL + "/alien.png", { frameWidth: 384 / 3, frameHeight: 256 / 2 });
     this.load.spritesheet("monsterChild", URL + "/monsterChild.png", { frameWidth: 64 / 2, frameHeight: 32 });
     this.load.image('nebula', URL + "/Blue_Nebula.png");
     this.load.image('exos', `${URL}/blue.png`)
@@ -62,10 +63,11 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.stop("startScene")
+
+    this.scene.shutdown("startScene")
     this.scale.startFullscreen();
     this.shipMusic = this.sound.add("bgMusic", BG_MUSIC_CONFIG);
-    let bgImg = this.add.tileSprite(0, 0, 800, 600, 'nebula').setOrigin(0).setScrollFactor(0)
+    let bgImg = this.add.tileSprite(0, 0, GAMEWIDTH, GAMEHEIGHT, 'nebula').setOrigin(0).setScrollFactor(0) //thw tilesprite
     let moon = this.add.image(100, 100, "moon").setScale(2).setOrigin(0).setScrollFactor(0)
     let mars = this.add.image(100, 10, "mars").setScale(0.5).setOrigin(0).setScrollFactor(0)
     this.monster = this.physics.add.sprite(GAMEWIDTH, GAMEHEIGHT / 2, "monster").setScale(3)
@@ -87,7 +89,7 @@ export default class mainScene extends Phaser.Scene {
       repeat: 5,
       frameRate: 5
     })
-    this.anims.create({
+    let rockAnim = this.anims.create({
       key: 'roll',
       frames: this.anims.generateFrameNames("ast1", { frames: [0, 1, 2, 3, 4, 5] }),
       repeat: -1,
@@ -114,8 +116,8 @@ export default class mainScene extends Phaser.Scene {
     this.time.addEvent({
       delay: 1000,
       callback: () => {
-        if(this.gas>0){
-        this.gas -= 5;
+        if (this.gas > 0) {
+          this.gas -= 5;
         }
         this.gasText.setText(`GAS: ${this.gas}ltrs`)
         if (this.player.y > 760) {
@@ -125,7 +127,7 @@ export default class mainScene extends Phaser.Scene {
           mChild.play("mChildIdle")
 
         }
-        
+
         else if (this.player.y < 760) {
           this.reached = true
         }
@@ -133,8 +135,8 @@ export default class mainScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     })
-    
-    
+
+
     let strX = 0,
       strY = 450;
     let rocks = this.physics.add.group({
@@ -144,15 +146,19 @@ export default class mainScene extends Phaser.Scene {
     for (let i = 0; i < 110; i++) {
       strY += Phaser.Math.Between(50, 70)
       strX = Phaser.Math.Between(this.monster.x - 300, this.monster.x - 100)
+      rockAnim.frameRate = Phaser.Math.Between(1, 16)
       let rok = rocks.create(strX, strY, 'ast1')
       rok.setScale(Phaser.Math.Between(1, 3))
+      rok.play('roll')
       rok.body.setSize(25, 25)
       strX = Phaser.Math.Between(this.monster.x + 200, this.monster.x + 300)
+      rockAnim.frameRate = Phaser.Math.Between(1, 16)
+
       rok = rocks.create(strX, strY, 'ast1')
       rok.setScale(Phaser.Math.Between(1, 3))
+      rok.play('roll')
       rok.body.setSize(25, 25)
     }
-    rocks.playAnimation('roll')
     this.physics.world.setBoundsCollision();
     this.physics.world.setBounds(0, 0, BG_SIZE_WIDTH, BG_SIZE_HEIGHT)
     this.player.body.setCollideWorldBounds();
@@ -163,8 +169,7 @@ export default class mainScene extends Phaser.Scene {
       .add(this, JOYSTICK_CONFIG(this))
       .on("update", this.dumpJoyStickState, this);
     this.padCursorKeys = this.joyStick.createCursorKeys();
-    this.dumpJoyStickState();
-    
+
     //create keyboard cursors keys
     this.keyboardCursorKeys = this.input.keyboard.createCursorKeys();
     var rect = this.add
@@ -233,7 +238,6 @@ export default class mainScene extends Phaser.Scene {
     })
 
     ykey.on("pointerdown", () => {
-      console.log(this.player.y);
       ringScaleUp(ykey);
       ykey.setScale(DOWN_SCALE);
     });
@@ -358,7 +362,8 @@ export default class mainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, monsterChildGp, () => {
       if (this.life > 0) {
         this.life -= 1
-        this.lifeText.setText(`Life: ${this.life}%`)
+        this.damage += 0.5
+        this.lifeText.setText(`Damage: ${this.damage}%`);
         this.player.setTint(0xcc0000);
         this.cameras.main.shake(100)
       }
@@ -367,15 +372,16 @@ export default class mainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, rocks, () => {
       if (this.life > 0) {
         this.life -= 1
-        this.lifeText.setText(`Life: ${this.life}%`)
+        this.damage += 0.5
+        this.lifeText.setText(`Damage: ${this.damage}%`)
         this.player.setTint(0xcc0000);
         this.cameras.main.shake(100)
       }
     }, null, this)
 
     this.scoreText = this.add.text(0, GAMEHEIGHT - GAMEHEIGHT, "Score: 0", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
-    this.gasText = this.add.text(GAMEWIDTH / 1.3, 0, "GAS: "+this.gas, TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
-    this.lifeText = this.add.text(GAMEWIDTH / 1.3, 80, "Life: 200%", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
+    this.gasText = this.add.text(GAMEWIDTH / 1.3, 0, "GAS: " + this.gas, TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
+    this.lifeText = this.add.text(GAMEWIDTH / 1.3, 80, "Damage: 0%", TEXT_CONFIG).setOrigin(0).setScrollFactor(0)
     this.physics.add.collider(this.player, this.monster, () => {
       if (this.monster.texture.key == 'monster') {
         this.player.setTexture('exp')
@@ -383,21 +389,21 @@ export default class mainScene extends Phaser.Scene {
         this.life = 0
       }
     }, null, this)
-    let myRect = this.add.rectangle(this.monster.x-50,750,100,200).setAlpha(0);
-    this.physics.add.existing(myRect,true)
-    this.physics.add.overlap(this.player,myRect,()=>{
-      if(this.textAdded == false){
-      let mytext = this.add.text(this.monster.x-200, this.monster.y+300, `press A or box to 
+    let myRect = this.add.rectangle(this.monster.x - 50, 750, 100, 200).setAlpha(0);
+    this.physics.add.existing(myRect, true)
+    this.physics.add.overlap(this.player, myRect, () => {
+      if (this.textAdded == false) {
+        let mytext = this.add.text(this.monster.x - 200, this.monster.y + 300, `press A or box to 
 shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
-      this.time.addEvent({
-        delay:2000,
-        callback:()=>{mytext.destroy()
-        }
-      })
-      this.textAdded =true
+        this.time.addEvent({
+          delay: 3000,
+          callback: () => {
+            mytext.destroy()
+          }
+        })
+        this.textAdded = true
       }
     })
-    
 
   }
   dumpJoyStickState() {
@@ -425,7 +431,7 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
       })
 
     }
-    else if (this.deadMe|| this.gas<5) {
+    else if (this.deadMe || this.gas < 5) {
       this.player.clearTint()
       this.shipMusic.stop()
       this.player.setTexture("exp")
@@ -439,7 +445,7 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
         callbackScope: this
       })
     }
-    if (this.life > 0 && this.gas>=5) {
+    if (this.life > 0 && this.gas >= 5) {
       if (this.moving) {
         this.player.clearTint()
         if (this.shipMusic.isPlaying == false) {
@@ -448,6 +454,7 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
       } else if (this.moving == false) {
         this.shipMusic.stop();
       }
+      this.player.setVelocity(0)
       if (this.padCursorKeys.up.isDown || this.keyboardCursorKeys.up.isDown) {
         this.player.setVelocityY(-300);
         this.shipEngine.emitParticle(300, this.player.x, this.player.y)
@@ -470,11 +477,11 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
         this.moving = false
         this.player.setVelocity(0);
       }
-    } else if (this.life <= 0 || this.gas<5) {
+    } else if (this.life <= 0 || this.gas < 5) {
       this.player.setVelocityY(-50);
       this.life = 0
       this.deadMe = true
-      
+
     }
   }
 
@@ -514,6 +521,14 @@ shoot missile now`, { fontSize: "32px", color: " #00ff00", fontStyle: "bold" })
       this.children.swap(this.player, bullet2)
       this.bulletGroup.addMultiple([bullet1, bullet2]);
       this.sound.play('shot', { volume: 15 })
+      this.time.addEvent({
+        delay: 1000,
+        callback: () => {
+          bullet1.destroy()
+          bullet2.destroy()
+        },
+        callbackScope: this
+      })
     }
   }
 }

@@ -22,7 +22,7 @@ let config = {
       debug: false,
     },
   },
-  scene: [startScene,mainScene, pauseScene,Won,Lost],
+  scene: [startScene, mainScene, pauseScene, Won, Lost],
 };
 
-let game = new Phaser.Game(config);
+new Phaser.Game(config);

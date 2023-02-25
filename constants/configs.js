@@ -5,7 +5,7 @@ export const JOYSTICK_CONFIG = function(scene) {
     x: GAMEWIDTH * 0.15,
     y: GAMEHEIGHT * 0.75,
     radius: 50,
-    dir: "4dir",
+    dir: 2,
     fixed: true,
     base: scene.add
       .image(200, 200, "base")
